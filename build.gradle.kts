@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.50"
-    id("application")
+    application
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("idea")
 }
@@ -31,6 +31,12 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
+application {
+    mainClassName = "MainKt"
+}
+
+
+
 /*tasks.getByName<Shadow>("shadowJar") {
     archiveClassifier = "exe"
     archiveBaseName = "key"
@@ -58,5 +64,7 @@ sourceSets{
         java.srcDir("$projectDir/build/generated-src/antlr4/main")
     }
 }
+
+
 tasks.getByName("compileKotlin").dependsOn(tasks.getByName("runAntlr4"))
 tasks.getByName("compileJava").dependsOn(tasks.getByName("runAntlr4"))
