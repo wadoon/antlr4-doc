@@ -23,7 +23,7 @@ class FindRuleSpecs() : ANTLRv4ParserBaseVisitor<Unit>() {
         fun find(e: Iterable<ParserRuleContext>): Pair<ArrayList<ANTLRv4Parser.LexerRuleSpecContext>, ArrayList<ANTLRv4Parser.ParserRuleSpecContext>> {
             return FindRuleSpecs().let { frs ->
                 e.forEach { it.accept(frs) }
-                return frs.tokenSpecs to frs.ruleSpecs
+                frs.tokenSpecs to frs.ruleSpecs
             }
         }
     }

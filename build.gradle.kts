@@ -58,4 +58,5 @@ sourceSets{
         java.srcDir("$projectDir/build/generated-src/antlr4/main")
     }
 }
+tasks.getByName("compileKotlin").dependsOn(tasks.getByName("runAntlr4"))
 tasks.getByName("compileJava").dependsOn(tasks.getByName("runAntlr4"))
