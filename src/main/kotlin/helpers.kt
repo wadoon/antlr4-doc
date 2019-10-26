@@ -1,10 +1,11 @@
+package com.github.wadoon.antlr4doc
+
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
 import org.antlr.parser.antlr4.ANTLRv4Parser
 import org.antlr.parser.antlr4.ANTLRv4ParserBaseVisitor
 import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.tree.TerminalNode
-import org.commonmark.internal.util.Escaping
 import java.io.StringWriter
 
 
@@ -164,12 +165,9 @@ private fun DIV.htmlVisitor(tokenMap: Map<String, String>): ANTLRv4ParserBaseVis
         private fun printStringLiteral(text: String) {
             +" "
             span("token-ref string-literal") {
-
-                +Escaping.escapeHtml(
-                    text
-                        .replace("\\\\", "\\")
-                        .trim('\'')
-                )
+                +text
+                    .replace("\\\\", "\\")
+                    .trim('\'')
             }
             +" "
         }
@@ -229,9 +227,9 @@ private fun DIV.htmlVisitor(tokenMap: Map<String, String>): ANTLRv4ParserBaseVis
         }
 
         override fun visitElementOptions(ctx: ANTLRv4Parser.ElementOptionsContext) {
-            antlr("&lt;")
+            antlr("<")
             ctx.elementOption().forEach { it.accept() }
-            antlr("&gt;")
+            antlr(">")
         }
 
         override fun visitLexerAltList(ctx: ANTLRv4Parser.LexerAltListContext) {

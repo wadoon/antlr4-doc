@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.github.wadoon"
-version = "0.1-SNAPSHOT"
+version = "0.1.0"
 
 repositories {
     mavenCentral()
@@ -32,9 +32,8 @@ tasks.withType<KotlinCompile> {
 }
 
 application {
-    mainClassName = "MainKt"
+    mainClassName = "com.github.wadoon.antlr4doc.Tool"
 }
-
 
 
 /*tasks.getByName<Shadow>("shadowJar") {
@@ -43,28 +42,39 @@ application {
 }*/
 
 val antlr4Output = "$projectDir/build/generated-src/antlr4/main/org/antlr/parser/antlr4"
-tasks.create<JavaExec>("runAntlr4"){
+tasks.create<JavaExec>("runAntlr4") {
     //see incremental task api, prevents rerun if nothing has changed.
     inputs.dir("src/main/antlr4/")
     outputs.dir("$projectDir/build/generated/antlr4/main/")
     classpath = antlr4
     main = "org.antlr.v4.Tool"
-    args = listOf("-visitor",
+    args = listOf(
+        "-visitor",
         "-Xexact-output-dir", "-o", antlr4Output,
         "-package", "org.antlr.parser.antlr4",
         "src/main/antlr4/LexBasic.g4",
-        "src/main/antlr4/ANTLRv4Lexer.g4", "src/main/antlr4/ANTLRv4Parser.g4")
+        "src/main/antlr4/ANTLRv4Lexer.g4", "src/main/antlr4/ANTLRv4Parser.g4"
+    )
     doFirst {
         file(antlr4Output).mkdirs()
         println("create $antlr4Output")
     }
 }
-sourceSets{
-    main{
+
+sourceSets {
+    main {
         java.srcDir("$projectDir/build/generated-src/antlr4/main")
     }
 }
 
+tasks.create<JavaExec>("runExample") {
+    dependsOn(tasks.getByName("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+
+    group = "applicaton"
+    main = application.mainClassName
+    args = listOf("--complete-html", "-o", "examples/Parser.html", "examples/Parser.g4")
+}
 
 tasks.getByName("compileKotlin").dependsOn(tasks.getByName("runAntlr4"))
 tasks.getByName("compileJava").dependsOn(tasks.getByName("runAntlr4"))

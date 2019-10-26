@@ -1,3 +1,6 @@
+package com.github.wadoon.antlr4doc
+
+
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
@@ -14,27 +17,43 @@ import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import java.io.File
 
-class Antlr4Doc : CliktCommand() {
-    val skipSimpleTokens by option().flag(default = true)
-    val title by option("--html-title").default("Grammar Documentation")
-    val files by argument("files", help = "list of antlr files to render")
+class Antlr4Doc : CliktCommand("Documentation Generator for ANTLRv4", name = "antlr4-doc") {
+    val skipSimpleTokens by option(
+        "--skip-simple-tokens",
+        help = "Simple tokens, tokens which are only consisting out a list of alternatives literal, will be skipped. Default: skip"
+    ).flag("--dont-skip-simple-tokens")
+
+    val title by option("--html-title", help = "title of the documentation")
+        .default("Grammar Documentation")
+
+    val files by argument("FILES", help = "list of ANTLR files to render")
         .file().multiple(true)
 
-    val output by option("--output", "-o", help = "output file")
+    val output by option("--output", "-o", help = "HTML output file. Default: output.html")
         .file().default(File("output.html"))
 
-    val completeHtml by option("--complete-html").flag()
-    val cssPath by option("--css").multiple(listOf("antlr4-default.css"))
+    val completeHtml by option(
+        "--complete-html",
+        help = "Generate a complete HTML file incl. head and body tags."
+    ).flag()
 
-    val sortLexical by option().flag()
+    val cssPath by option(
+        "--css",
+        help = "CSS files to refer to. Use with `--complete-html`"
+    ).multiple(listOf("antlr4-default.css"))
+
+    val sortLexical by option("--sort-lexical", help = "Sort the rules in lexcial order")
+        .flag(default = false)
 
     val out by lazy { output.bufferedWriter() }
     val markdownParser = Parser.builder().build()
     val htmlRenderer = HtmlRenderer.builder().build()
     var tokenMap: Map<String, String> = hashMapOf()
 
-
     override fun run() {
+        println("antlr4-doc -- Documentation Generator for ANTLRv4")
+        println("Version ${Tool.VERSION} GPLv3 https://github.com/wadoon/antlr4-doc/")
+
         val inputFiles = files.map(::parse)
         val errorFiles = inputFiles
             .mapIndexed { i, a -> if (a == null) i else -1 }
@@ -49,11 +68,11 @@ class Antlr4Doc : CliktCommand() {
         val ctxs = inputFiles.filterNotNull()
         val (tokenSpecs, ruleSpecs) = FindRuleSpecs.find(ctxs)
         if (sortLexical) {
+            println("sort lex")
             ruleSpecs.sortBy { it.RULE_REF().text }
             tokenSpecs.sortBy { it.TOKEN_REF().text }
         }
         tokenMap = tokenSpecs.mapNotNull { tokenValue(it) }.toMap()
-        println(tokenMap)
         ctxs.flatMap { it.DOC_COMMENT() }.forEach { writeComment(it.text); }
         tokenSpecs.forEach(::writeTokenSpec)
         ruleSpecs.forEach(::writeRuleSpec)
@@ -113,5 +132,8 @@ class Antlr4Doc : CliktCommand() {
     }
 }
 
-
-fun main(args: Array<String>) = Antlr4Doc().main(args)
+object Tool {
+    val VERSION = "0.1.0"
+    @JvmStatic
+    fun main(args: Array<String>) = Antlr4Doc().main(args)
+}
