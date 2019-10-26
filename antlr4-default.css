@@ -1,0 +1,39 @@
+div.rule {
+    border: 1px solid navy;
+    margin: 1.5em;
+    padding:.5em;
+    background:aliceblue;
+    font-family:monospace;
+}
+
+span.meta {
+    font-weight:bold;
+}
+
+span.label {
+    font-size:80%;
+}
+
+
+div.rule-body {
+    margin-left:1em;
+}
+
+span.token-ref {
+    color:green !important;
+}
+
+span.string-literal { font-weight: 900;}
+span.token-ref a { color:green;}
+
+
+sub.label {
+    margin-left: -1ex
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+.rule-ref {font-style:italic;}
