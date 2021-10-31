@@ -13,6 +13,8 @@ import org.antlr.parser.antlr4.ANTLRv4Lexer
 import org.antlr.parser.antlr4.ANTLRv4Parser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.Token
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import java.io.File
@@ -35,7 +37,7 @@ class Antlr4Doc : CliktCommand("Documentation Generator for ANTLRv4", name = "an
     val completeHtml by option(
         "--complete-html",
         help = "Generate a complete HTML file incl. head and body tags."
-    ).flag()
+    ).flag("-H")
 
     val cssPath by option(
         "--css",
@@ -89,12 +91,20 @@ class Antlr4Doc : CliktCommand("Documentation Generator for ANTLRv4", name = "an
     private fun writeTokenSpec(it: ANTLRv4Parser.LexerRuleSpecContext) {
         if (it.simpleTokenValue() != null && skipSimpleTokens) return
         it.DOC_COMMENT().forEach { writeComment(it.text); }
-        out.write(it.asHtml(tokenMap))
+        out.write(it.asHtml(tokenMap, getTokens(it)))
+    }
+
+    val tokenCache = HashMap<File, List<Token>>()
+    private fun getTokens(ctx: ParserRuleContext): List<Token> {
+        val file = File(ctx.start.tokenSource.sourceName)
+        return tokenCache.computeIfAbsent(file) { f ->
+            lex(f).map { it }
+        }
     }
 
     private fun writeRuleSpec(it: ANTLRv4Parser.ParserRuleSpecContext) {
         it.DOC_COMMENT().forEach { writeComment(it.text); }
-        out.write(it.asHtml(tokenMap))
+        out.write(it.asHtml(tokenMap, getTokens(it)))
     }
 
     private fun printHeader() {
@@ -116,6 +126,10 @@ class Antlr4Doc : CliktCommand("Documentation Generator for ANTLRv4", name = "an
         +"</body></html>"
     }
 
+    fun lex(file: File): MutableList<out Token> {
+        val lexer = ANTLRv4Lexer(CharStreams.fromFileName(file.absolutePath))
+        return lexer.allTokens
+    }
 
     fun parse(file: File): ANTLRv4Parser.GrammarSpecContext? {
         val lexer = ANTLRv4Lexer(CharStreams.fromFileName(file.absolutePath))
@@ -134,6 +148,7 @@ class Antlr4Doc : CliktCommand("Documentation Generator for ANTLRv4", name = "an
 
 object Tool {
     val VERSION = "0.1.0"
+
     @JvmStatic
     fun main(args: Array<String>) = Antlr4Doc().main(args)
 }

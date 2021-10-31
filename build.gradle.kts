@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.5.31"
     application
-    id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
     id("idea")
 }
 
@@ -21,7 +21,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.antlr:antlr4-runtime:4.7.1")
     implementation("com.github.ajalt:clikt:2.2.0")
-    compile("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.12")
     implementation("com.atlassian.commonmark:commonmark:0.13.0")
     implementation("com.atlassian.commonmark:commonmark-ext-gfm-tables:0.13.0")
     antlr4("org.antlr:antlr4:4.7.1")
